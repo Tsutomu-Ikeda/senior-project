@@ -1,0 +1,9 @@
+version: '3'
+services:
+  audio:
+    build:
+      context: audio
+    ports:
+      - "3080:8080"
+    volumes:
+      - ./audio/src:/app/

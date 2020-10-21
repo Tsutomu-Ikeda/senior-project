@@ -1,0 +1,4 @@
+flask
+pyaudio
+uwsgi
+pillow
