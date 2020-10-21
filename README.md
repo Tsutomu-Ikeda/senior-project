@@ -18,7 +18,7 @@
 
 - Matlabは、以前情報理工学実験でインストールした Matlab R2018aが残っていた。
 - Audacityは、新規インストールした。
-  ![Audacity 2.4.2](assets/images/2020-10-11-01-46-01.png)
+  <img alt="Audacity 2.4.2" src="assets/images/2020-10-11-01-46-01.png" height=300>
 
 ### 音声の入出力する方法について調べた
 
@@ -60,5 +60,78 @@
 ### 登校して実験
 - 去年の装置が動くか確認した
 - 色んな周波数の正弦波、矩形波を生成した
-- 結局正弦波を送ることはできなかった
+- 矩形波は形が崩れ、情報を取り出すには難しそうな形になってしまった
 
+![](assets/images/square_received.png)
+
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201020/470microf_10Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201020/470microf_10Hz_square.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201020/470microf_100Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201020/470microf_100Hz_square.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201020/2200microf_10Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201020/2200microf_10Hz_square.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201020/2200microf_100Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201020/2200microf_100Hz_square.wav</p>
+</audio>
+
+- 結局正弦波すら送ることはできなかった
+
+## 2020年10月21日
+
+### 投稿して実験
+- 電荷が溜まっていないコンデンサならきれいな正弦波を送れることに気がついた
+
+コンデンサの容量が多ければ多いほど安定した正弦波を送れる時間が長くなる
+
+2200μF, 523Hzで送ったとき
+- 2秒ごろ
+  ![](assets/images/pseudo_sin_wav_2sec.png)
+- 3秒〜10秒
+  ![](assets/images/pseudo_sin_wav.png)
+- 12秒ごろ
+  ![](assets/images/pseudo_sin_wav_12sec.png)
+- 14秒ごろ
+  ![](assets/images/assets/images/pseudo_sin_wav_14sec.png)
+
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/470microf_523Hz.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/470microf_523Hz.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/2200microf_523Hz.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/2200microf_523Hz.wav</p>
+</audio>
+
+- 抵抗をコンデンサと入力の間に挟むと正弦波を送ることができた
+
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/40microF_100Hz.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_100Hz.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/40microF_523Hz.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_523Hz.wav</p>
+</audio>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/40microF_1000Hz.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_1000Hz.wav</p>
+</audio>
+
+- 矩形波は結局送ることができなかった
+
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/40microF_100Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_100Hz_square.wav</p>
+</audio>
+<audio controls="controls">
+  <source type="audio/mp3" src="assets/audio/20201021/40microF_1000Hz_square.wav"></source>
+  <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_1000Hz_square.wav</p>
+</audio>
