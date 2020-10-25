@@ -7,3 +7,5 @@ services:
       - "3080:8080"
     volumes:
       - ./audio/src:/app/
+    tty: true
+    restart: always

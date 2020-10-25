@@ -135,3 +135,10 @@
   <source type="audio/mp3" src="assets/audio/20201021/40microF_1000Hz_square.wav"></source>
   <p>https://github.com/Tsutomu-Ikeda/senior-project/blob/main/assets/audio/20201021/40microF_1000Hz_square.wav</p>
 </audio>
+
+## 2020年10月25日
+
+- ブラウザで録音した音声をサーバー側で処理する仕組みを作った
+- サンプリングレートは48000Hz, 変調周波数は4800Hz, 通信速度は4.8kbps
+- JPEGのSOI(0xFFD8) EOI(0xFFD9)について調べた
+- JPEGのバイナリから音声化する処理を書いた

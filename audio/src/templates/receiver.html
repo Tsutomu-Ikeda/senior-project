@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光ファイバ通信のデモ</title>
+    <style>
+      * {
+        background: #333;
+        color: #aaa;
+      }
+
+      button {
+        background: #aaa;
+        color: #333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>
+      光ファイバ通信のデモ(受信側)
+    </h1>
+    <input type="text" id="msg" value="start" hidden="hidden"/>
+    <button id="start-button">受信開始</button>
+    <button id="end-button">受信終了</button>
+    <br>
+    <img id="png-image" src="data:image/jpeg;base64," width="640px" hidden="hidden"></img>
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript">
+      const SAMPLING_RATE = 48000;
+      const BUFFER_SIZE = 16384;
+      let ws,
+        processor;
+
+      const handleAudio = function (stream) {
+        const context = new AudioContext({sampleRate: SAMPLING_RATE});
+        const input = context.createMediaStreamSource(stream)
+        processor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
+
+        input.connect(processor);
+        processor.connect(context.destination);
+
+        processor.onaudioprocess = function (e) {
+          const voice = e
+            .inputBuffer
+            .getChannelData(0);
+          ws.send(voice);
+        };
+      };
+
+      $("#start-button").on("click", function () {
+        ws = new WebSocket(`ws://${location.host}/pipe`);
+        $('#png-image').attr('src', 'data:image/jpeg;base64,');
+        ws.onopen = function () {
+          ws.onmessage = function (message) {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const received_data = reader
+                .result
+                .replace(/^data:application\/octet-stream;base64,/, '');
+
+              $('#png-image').attr('src', $('#png-image').attr('src') + received_data);
+              if ($('#png-image').attr('hidden')) {
+                $('#png-image').attr('hidden', false);
+              }
+            };
+            reader.readAsDataURL(message.data);
+          }
+        };
+        navigator
+          .mediaDevices
+          .getUserMedia({
+            audio: {
+              echoCancellation: false
+            },
+            video: false
+          })
+          .then(handleAudio);
+      });
+
+      $("#end-button").on("click", function () {
+        ws.close();
+        processor.onaudioprocess = null;
+      });
+    </script>
+  </body>
+
+</html>

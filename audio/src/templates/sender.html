@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光ファイバ通信のデモ</title>
+    <style>
+      * {
+        background: #333;
+        color: #aaa;
+      }
+
+      button {
+        background: #aaa;
+        color: #333;
+      }
+
+      .option {
+        width: 250px;
+      }
+
+      .color > a {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+      }
+
+      .black {
+        background-color: #000000;
+      }
+
+      .red {
+        background-color: #ff0000;
+      }
+
+      .blue {
+        background-color: #0000ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h1>
+      光ファイバ通信のデモ(送信側)
+    </h1>
+    <audio id="audio-player" src="" controls>
+      Your browser does not support the audio element.
+    </audio>
+    <button id="send-button">送信開始</button>
+    <br>
+    <canvas id="canvas" width="480" height="320" style="border: solid 1px #000;box-sizing: border-box;"></canvas>
+    <div class="option">
+      <div class="color">
+        色：
+        <a href="" class="black" data-color="0, 0, 0, 1"></a>
+        <a href="" class="red" data-color="255, 0, 0, 1"></a>
+        <a href="" class="blue" data-color="0, 0, 255, 1"></a>
+      </div>
+      <div class="bold">
+        太さ：
+        <a href="" class="small" data-bold="1">小</a>
+        <a href="" class="middle" data-bold="5">中</a>
+        <a href="" class="large" data-bold="10">大</a>
+      </div>
+    </div>
+    <input type="button" value="clear" id="clear">
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript">
+      var cnvs = document.getElementById('canvas');
+      var ctx = cnvs.getContext('2d');
+
+      // 変数宣言
+      const cnvWidth = 480;
+      const cnvHeight = 320;
+      var cnvColor = "255, 0, 0, 1"; // 線の色
+      var cnvBold = 5; // 線の太さ
+      var clickFlg = 0; // クリック中の判定 1:クリック開始 2:クリック中
+      var bgColor = "rgb(255,255,255)";
+
+      // canvasの背景色を設定(指定がない場合にjpeg保存すると背景が黒になる)
+      setBgColor();
+
+      // canvas上でのイベント
+      $("#canvas")
+        .mousedown(function () {
+          clickFlg = 1; // マウス押下開始
+        })
+        .mouseup(function () {
+          clickFlg = 0; // マウス押下終了
+        })
+        .mousemove(function (e) {
+          // マウス移動処理
+          if (!clickFlg) 
+            return false;
+          draw(e.offsetX, e.offsetY);
+        });
+
+      function draw(x, y) {
+        ctx.lineWidth = cnvBold;
+        ctx.strokeStyle = 'rgba(' + cnvColor + ')';
+        if (clickFlg == "1") {
+          clickFlg = "2";
+          ctx.beginPath();
+          ctx.lineCap = "round";
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      };
+
+      // 色の変更
+      $(".color a").click(function () {
+        cnvColor = $(this).data("color");
+        return false;
+      });
+
+      // 線の太さ変更
+      $(".bold a").click(function () {
+        cnvBold = $(this).data("bold");
+        return false;
+      });
+
+      // 描画クリア
+      $("#clear").click(function () {
+        ctx.clearRect(0, 0, cnvWidth, cnvHeight);
+        setBgColor();
+      });
+
+      function setBgColor() {
+        // canvasの背景色を設定(指定がない場合にjpeg保存すると背景が黒になる)
+        ctx.fillStyle = bgColor;
+        ctx.fillRect(0, 0, cnvWidth, cnvHeight);
+      }
+      $('#send-button').click(function () {
+        var sendImageBinary = function (blob) {
+          var formData = new FormData();
+          formData.append('file', blob);
+          const xhr = new XMLHttpRequest();
+
+          xhr.open('POST', '/gen_audio_signal', true);
+          xhr.responseType = 'blob';
+
+          xhr.onload = () => {
+            console.log(xhr.responseType);
+            const reader = new FileReader();
+            reader.onload = () => {
+              const audio_binary = reader
+                .result
+                .replace(/^data:application\/octet-stream;base64,/, 'data:audio/wav;base64,');
+              $('#audio-player').attr('src', audio_binary);
+            }
+            reader.readAsDataURL(xhr.response);
+          };
+          xhr.send(formData);
+        }
+
+        canvas = $('#canvas')[0].toDataURL("image/jpeg", 0.9);
+        var base64Data = canvas.split(',')[1],
+          data = window.atob(base64Data),
+          buff = new ArrayBuffer(data.length),
+          arr = new Uint8Array(buff),
+          blob,
+          i,
+          dataLen;
+
+        for (i = 0, dataLen = data.length; i < dataLen; i++) {
+          arr[i] = data.charCodeAt(i);
+        }
+        blob = new Blob([arr], {type: 'image/jpeg'});
+        sendImageBinary(blob);
+      });
+    </script>
+  </body>
+
+</html>
