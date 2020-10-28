@@ -22,11 +22,10 @@
     <h1>
       光ファイバ通信のデモ(受信側)
     </h1>
-    <input type="text" id="msg" value="start" hidden="hidden"/>
     <button id="start-button">受信開始</button>
     <button id="end-button">受信終了</button>
     <br>
-    <img id="png-image" src="data:image/jpeg;base64," width="640px" hidden="hidden"></img>
+    <img id="png-image" width="640px" hidden="hidden"></img>
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script type="text/javascript">
       const SAMPLING_RATE = 48000;
@@ -52,21 +51,25 @@
 
       $("#start-button").on("click", function () {
         ws = new WebSocket(`ws://${location.host}/pipe`);
-        $('#png-image').attr('src', 'data:image/jpeg;base64,');
+        let image_src = 'data:image/jpeg;base64,';
         ws.onopen = function () {
           ws.onmessage = function (message) {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const received_data = reader
-                .result
-                .replace(/^data:application\/octet-stream;base64,/, '');
+            if (message.data) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const received_data = reader
+                  .result
+                  .replace(/^data:([^,]+,)?/, '');;
 
-              $('#png-image').attr('src', $('#png-image').attr('src') + received_data);
-              if ($('#png-image').attr('hidden')) {
-                $('#png-image').attr('hidden', false);
-              }
-            };
-            reader.readAsDataURL(message.data);
+                image_src += received_data;
+
+                $('#png-image').attr('src', image_src);
+                if ($('#png-image').attr('hidden')) {
+                  $('#png-image').attr('hidden', false);
+                }
+              };
+              reader.readAsDataURL(message.data);
+            }
           }
         };
         navigator
