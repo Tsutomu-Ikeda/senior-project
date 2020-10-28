@@ -257,13 +257,54 @@ def gen_audio_signal():
     return resp
 
 
+@app.route('/gen_audio_ook', methods=['POST'])
+def gen_audio_ook():
+    if not (file := flask.request.files.get('file')):
+        return "Bad Request", 400
+
+    body = file.stream.read()
+    print(len(body))
+
+    fs = constants.SAMPLING_RATE
+
+    arr_bits = utils.bytes_to_bits(body)
+    one_bit_length = 8
+
+    def get_fragment(val):
+        if val == 1:
+            yield from (int(math.sin(2 * math.pi * x / one_bit_length) * constants.SHORT_MAX_VAL) for x in range(one_bit_length))
+        else:
+            yield from itertools.repeat(0, one_bit_length)
+
+    def get_array():
+        yield from constants.PREAMBLE
+        yield from arr_bits
+
+    wave_val = list(itertools.chain.from_iterable(
+        get_fragment(val)
+        for val
+        in get_array()
+    ))
+    bin_wave = struct.pack(f"{len(wave_val)}h", *wave_val)
+
+    temp = io.BytesIO()
+    w = wave.Wave_write(temp)
+    w.setparams((1, 2, fs, len(bin_wave), 'NONE', 'not compressed'))
+    w.writeframes(bin_wave)
+    w.close()
+
+    resp = flask.make_response(temp.getvalue())
+    resp.headers['Content-Type'] = "audio/wav"
+
+    return resp
+
+
 @app.route('/pipe')
 def pipe():
     ws = flask.request.environ['wsgi.websocket']
     if ws:
         png_image = pathlib.Path('image.jpg')
         data = png_image.read_bytes()
-        chunk_size = 1002
         i = 0
         audio_data = []
 
@@ -274,6 +315,9 @@ def pipe():
                     with open(f'static/{datetime.datetime.now():%Y-%m-%d-%H-%M-%S}.wav', 'wb') as f:
                         wf = wave.Wave_write(f)
                         print(len(audio_data))
+                        max_amp = max(max(audio_data), -min(audio_data))
+                        if max_amp > constants.SHORT_MAX_VAL:
+                            audio_data = list(map(lambda x: int(x / max_amp * constants.SHORT_MAX_VAL), audio_data))
                         bin_wave = struct.pack(f"{len(audio_data)}h", *audio_data)
                         wf.setparams((1, 2, constants.SAMPLING_RATE, len(bin_wave), 'NONE', 'not compressed'))
                         wf.writeframes(bin_wave)
@@ -281,11 +325,13 @@ def pipe():
                 break
 
             if i < len(data):
-                ws.send(data[i:i + chunk_size])
-                i += chunk_size
+                end = (len(audio_data) // 192) * 3
+                if i < end:
+                    ws.send(data[i:end])
+                    i = end
 
             if message:
-                arr = [int(val * constants.SHORT_MAX_VAL) for val in struct.unpack(f"{constants.BUFFER_SIZE}f", message)]
+                arr = [int(val * constants.SHORT_MAX_VAL) for val in struct.unpack(f"{len(message)//4}f", message)]
                 audio_data.extend(arr)
 
     return ""
