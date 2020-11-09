@@ -1,0 +1,52 @@
+
+body {
+  background: #333;
+  color: #aaa;
+}
+
+header {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  background: #333;
+  padding: 10px 0px;
+}
+
+h1 {
+  font-size: 1.5em;
+  margin: 10px 0px;
+}
+
+ul {
+  list-style-type: none;
+  width: 100%;
+  display: grid;
+  grid-gap: 0.5rem;
+  grid-template-columns: 1fr 1fr;
+  padding: 0;
+}
+
+li {
+  padding: 5px 0 5px 10px;
+  background-color: #666;
+}
+
+a {
+  color: #fff;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #ccc;
+  text-decoration: none;
+}
+
+button {
+  background: #aaa;
+  color: #333;
+}
+
+#app-wrapper {
+  width: 90%;
+  margin: auto;
+}

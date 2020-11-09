@@ -5,17 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>光ファイバ通信のデモ</title>
+    <link rel="stylesheet" href="/static/css/style.css">
     <style>
-      * {
-        background: #333;
-        color: #aaa;
-      }
-
-      button {
-        background: #aaa;
-        color: #333;
-      }
-
       .option {
         width: 250px;
       }
@@ -41,30 +32,36 @@
   </head>
 
   <body>
-    <h1>
-      光ファイバ通信のデモ(送信側)
-    </h1>
-    <audio id="audio-player" src="" controls>
-      Your browser does not support the audio element.
-    </audio>
-    <button id="send-button">送信開始</button>
-    <br>
-    <canvas id="canvas" width="480" height="320" style="border: solid 1px #000;box-sizing: border-box;"></canvas>
-    <div class="option">
-      <div class="color">
-        色：
-        <a href="" class="black" data-color="0, 0, 0, 1"></a>
-        <a href="" class="red" data-color="255, 0, 0, 1"></a>
-        <a href="" class="blue" data-color="0, 0, 255, 1"></a>
+    <div id="app-wrapper">
+      <header>
+        <a href="/app">< TOP(光ファイバ通信のデモ)</a>
+      </header>
+      <h1>
+        送信側アプリケーション
+      </h1>
+      <button id="trans-button">音声へ変換</button>
+      <button id="send-button">送信開始</button><br>
+      <audio id="audio-player" src="" controls>
+        Your browser does not support the audio element.
+      </audio>
+      <br>
+      <canvas id="canvas" width="480" height="320" style="border: solid 1px #000;box-sizing: border-box;"></canvas>
+      <div class="option">
+        <div class="color">
+          色：
+          <a href="" class="black" data-color="0, 0, 0, 1"></a>
+          <a href="" class="red" data-color="255, 0, 0, 1"></a>
+          <a href="" class="blue" data-color="0, 0, 255, 1"></a>
+        </div>
+        <div class="bold">
+          太さ：
+          <a href="" class="small" data-bold="1">小</a>
+          <a href="" class="middle" data-bold="5">中</a>
+          <a href="" class="large" data-bold="10">大</a>
+        </div>
       </div>
-      <div class="bold">
-        太さ：
-        <a href="" class="small" data-bold="1">小</a>
-        <a href="" class="middle" data-bold="5">中</a>
-        <a href="" class="large" data-bold="10">大</a>
-      </div>
+      <input type="button" value="clear" id="clear">
     </div>
-    <input type="button" value="clear" id="clear">
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script type="text/javascript">
       var cnvs = document.getElementById('canvas');
@@ -133,7 +130,7 @@
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, cnvWidth, cnvHeight);
       }
-      $('#send-button').click(function () {
+      $('#trans-button').click(function () {
         var sendImageBinary = function (blob) {
           var formData = new FormData();
           formData.append('file', blob);
@@ -143,7 +140,6 @@
           xhr.responseType = 'blob';
 
           xhr.onload = () => {
-            console.log(xhr.responseType);
             const reader = new FileReader();
             reader.onload = () => {
               const audio_binary = reader
@@ -171,6 +167,11 @@
         blob = new Blob([arr], {type: 'image/jpeg'});
         sendImageBinary(blob);
       });
+      $('#send-button').on('click', () => {
+        const audioPlayer = $('#audio-player')[0];
+        audioPlayer.currentTime = 0;
+        audioPlayer.play();
+      })
     </script>
   </body>
 

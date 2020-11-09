@@ -5,36 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>光ファイバ通信のデモ</title>
-    <style>
-      * {
-        background: #333;
-        color: #aaa;
-      }
-
-      button {
-        background: #aaa;
-        color: #333;
-      }
-    </style>
+    <link rel="stylesheet" href="/static/css/style.css">
   </head>
 
   <body>
-    <h1>
-      光ファイバ通信のデモ(受信側)
-    </h1>
-    <button id="start-button">受信開始</button>
-    <button id="end-button">受信終了</button>
-    <br>
-    <img id="png-image" width="640px" hidden="hidden"></img>
+    <div id="app-wrapper">
+      <header>
+        <a href="/app">< top(光ファイバ通信のデモ)</a>
+      </header>
+      <h1>
+        受信側アプリケーション
+      </h1>
+      <div style="margin-bottom: 10px">
+        <button id="start-button">受信開始</button>
+        <button id="end-button">受信終了</button>
+      </div>
+      <img id="image" hidden="hidden"></img>
+      <canvas id="canvas" hidden="hidden"></canvas>
+    </div>
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script type="text/javascript">
       const SAMPLING_RATE = 48000;
       const BUFFER_SIZE = 16384;
+
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
       let ws,
         processor;
 
       const handleAudio = function (stream) {
-        const context = new AudioContext({sampleRate: SAMPLING_RATE});
+        const context = new AudioContext();
         const input = context.createMediaStreamSource(stream)
         processor = context.createScriptProcessor(BUFFER_SIZE, 1, 1);
 
@@ -45,13 +46,26 @@
           const voice = e
             .inputBuffer
             .getChannelData(0);
-          ws.send(voice);
+
+          if (ws.readyState !== WebSocket.CLOSED) {
+            ws.send(voice);
+          }
         };
+
+        ws.onclose = () => {
+          context.close();
+          stream
+            .getTracks()
+            .forEach(function (track) {
+              track.stop();
+            });
+        }
       };
 
       $("#start-button").on("click", function () {
         ws = new WebSocket(`ws://${location.host}/pipe`);
         let image_src = 'data:image/jpeg;base64,';
+        let image_data;
         ws.onopen = function () {
           ws.onmessage = function (message) {
             if (message.data) {
@@ -63,29 +77,43 @@
 
                 image_src += received_data;
 
-                $('#png-image').attr('src', image_src);
-                if ($('#png-image').attr('hidden')) {
-                  $('#png-image').attr('hidden', false);
+                var img = new Image();
+                img.onload = function () {
+                  $('#image').attr('src', image_src);
+                  if ($('#image').attr('hidden')) {
+                    $('#image').attr('hidden', false);
+                  }
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                };
+
+                img.src = image_src;
+                $('#image').attr('src', image_src);
+                if ($('#image').attr('hidden')) {
+                  $('#image').attr('hidden', false);
                 }
               };
               reader.readAsDataURL(message.data);
             }
           }
+          navigator
+            .mediaDevices
+            .getUserMedia({
+              audio: {
+                echoCancellation: false,
+                autoGainControl: false,
+                noiseSuppression: false
+              },
+              video: false
+            })
+            .then(handleAudio);
         };
-        navigator
-          .mediaDevices
-          .getUserMedia({
-            audio: {
-              echoCancellation: false
-            },
-            video: false
-          })
-          .then(handleAudio);
       });
 
       $("#end-button").on("click", function () {
-        ws.close();
         processor.onaudioprocess = null;
+        if (ws.readyState !== WebSocket.CLOSED) {
+          ws.close();
+        }
       });
     </script>
   </body>

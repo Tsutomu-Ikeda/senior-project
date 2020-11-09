@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+  <head>
+    <title>
+      Path:
+      {{ tree.name }}
+    </title>
+    <link rel="stylesheet" href="/static/css/style.css">
+  </head>
+
+  <body>
+    <div id="app-wrapper">
+      <header>
+        <a href="/app">< TOP(光ファイバ通信のデモ)</a>
+      </header>
+      <h1>
+        /{{ tree.name }}
+        files
+      </h1>
+      <ul>
+        {% set ns = namespace(count=0) %}
+        {%- for item in tree.children recursive %}
+          <a href="/{{ item.name }}" target="_blank" rel="noopener">
+            <li>/{{ item.name }}
+            </li>
+          </a>
+          {%- if 'orig' not in item.name and ns.count % 2 == 0 -%}
+            <li></li>
+            {% set ns.count = ns.count + 1 %}
+          {%- endif %}
+          {% set ns.count = ns.count + 1 %}
+        {%- endfor %}
+      </ul>
+    </div>
+  </body>
+
+</html>
