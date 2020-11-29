@@ -12,14 +12,16 @@
   <body>
     <div id="app-wrapper">
       <header>
-        <a href="/app">< TOP(光ファイバ通信のデモ)</a>
+        <a href="/app">< top(光ファイバ通信のデモ)</a>
       </header>
+      <div id="dropbox">ここにドラッグアンドドロップしてください。
+      </div>
       <h1>
         /{{ tree.name }}
         files
       </h1>
       <ul>
-        {% set ns = namespace(count=0) %}
+        {% set ns = namespace(count = 0) %}
         {%- for item in tree.children recursive %}
           <a href="/{{ item.name }}" target="_blank" rel="noopener">
             <li>/{{ item.name }}
@@ -33,6 +35,36 @@
         {%- endfor %}
       </ul>
     </div>
+    <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript">
+      const cancelDefault = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      };
+      $('#dropbox').on('dragenter', cancelDefault);
+      $('#dropbox').on('dragover', cancelDefault);
+      $('#dropbox').on('drop', (_e) => {
+        let e = _e;
+        if (_e.originalEvent) {
+          e = _e.originalEvent;
+        }
+        cancelDefault(e);
+        const files = e.dataTransfer.files;
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const type = file.type;
+          const filename = file.fileName;
+
+          const fd = new FormData();
+
+          fd.append("file", file);
+          fetch("/upload", {
+            method: "POST",
+            body: fd
+          })
+        }
+      })
+    </script>
   </body>
 
 </html>

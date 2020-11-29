@@ -303,6 +303,15 @@ def gen_audio_ook():
     return resp
 
 
+@app.route("/upload", methods=["POST"])
+def handle_upload():
+    file = flask.request.files['file']
+    if file and file.filename.lower().endswith(".wav"):
+        filename = file.filename
+        file.save(pathlib.Path("./static") / filename)
+    return "OK"
+
+
 @app.route('/pipe')
 def pipe():
     ws = flask.request.environ['wsgi.websocket']

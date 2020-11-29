@@ -50,3 +50,15 @@ button {
   width: 90%;
   margin: auto;
 }
+
+#dropbox {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  height: 200px;
+  background: #666;
+  color: #fff;
+}
