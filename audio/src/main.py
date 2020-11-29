@@ -315,13 +315,14 @@ def handle_upload():
 @app.route('/pipe')
 def pipe():
     ws = flask.request.environ['wsgi.websocket']
+    is_mock = flask.request.args.get("is_mock", type=bool, default=False)
     if ws:
-        # recorded_wave = './static/2020-10-28-08-19-44.wav'
-        # recorded_wave = './static/doraemon2.wav'
-        # wr = wave.open(recorded_wave, 'r')
-        # wave_buffer = wr.readframes(-1)
-        # data = struct.unpack(f"{len(wave_buffer)//2}h", wave_buffer)
-        # wr.close()
+        if is_mock:
+            recorded_wave = './static/2020-11-09-08-03-38.wav'
+            wr = wave.open(recorded_wave, 'r')
+            wave_buffer = wr.readframes(-1)
+            recorded_data = list(struct.unpack(f"{len(wave_buffer)//2}h", wave_buffer))
+            wr.close()
 
         audio_data = []
         VAL_THRESHOLD = int(constants.SHORT_MAX_VAL * 0.4)
@@ -337,22 +338,21 @@ def pipe():
         while True:
             if (message := ws.receive()) is None:
                 print('websocket connetion closed')
-                if audio_data:
-                    with open(f'static/{datetime.datetime.now():%Y-%m-%d-%H-%M-%S}.wav', 'wb') as f:
-                        wf = wave.Wave_write(f)
-                        max_amp = max(max(audio_data), -min(audio_data))
-                        if max_amp > constants.SHORT_MAX_VAL:
-                            audio_data = list(map(lambda x: int(x / max_amp * constants.SHORT_MAX_VAL), audio_data))
-                        bin_wave = struct.pack(f"{len(audio_data)}h", *audio_data)
-                        wf.setparams((1, 2, constants.SAMPLING_RATE, len(bin_wave), 'NONE', 'not compressed'))
-                        wf.writeframes(bin_wave)
-                        wf.close()
+                if not is_mock:
+                    utils.save_audio_data(
+                        f'static/{datetime.datetime.now():%Y-%m-%d-%H-%M-%S}.wav',
+                        audio_data
+                    )
                 break
 
             if message:
                 receveied = [int(val * constants.SHORT_MAX_VAL) for val in struct.unpack(f"{len(message)//4}f", message)]
                 len_received = len(receveied)
-                audio_data.extend(receveied)
+                if is_mock:
+                    audio_data.extend(recorded_data[:len_received])
+                    del recorded_data[:len_received]
+                else:
+                    audio_data.extend(receveied)
 
                 if len_received > 0:
                     for j in range(last_seek, len(audio_data)):
@@ -395,18 +395,17 @@ def pipe():
                             bits = decoded_values[last_send_seek:last_send_seek + length]
                             last_send_seek += length
                             ws.send(bytes(list(int(bits, 2).to_bytes(len(bits) // 8, 'big'))))
-                # else:
-                #     if last_send_seek > -1:
-                #         length = (len(decoded_values) - last_send_seek)
-                #         if length > 0:
-                #             bits = decoded_values[last_send_seek:last_send_seek + length]
-                #             padded = bits + '0' * (8 - len(bits) % 8)
-                #             last_send_seek += length
-                #             ws.send(bytes(list(int(padded, 2).to_bytes(len(padded) // 8, 'big'))))
-
-                #     if ws:
-                #         ws.close()
-                #         break
+                else:
+                    if last_send_seek > -1:
+                        length = (len(decoded_values) - last_send_seek)
+                        if length > 0:
+                            bits = decoded_values[last_send_seek:last_send_seek + length]
+                            padded = bits + '0' * (8 - len(bits) % 8)
+                            last_send_seek += length
+                            ws.send(bytes(list(int(padded, 2).to_bytes(len(padded) // 8, 'big'))))
+                    if ws:
+                        ws.close()
+                        break
 
     return ""
 

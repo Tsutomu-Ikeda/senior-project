@@ -1,5 +1,9 @@
-import pathlib
 import os
+import pathlib
+import struct
+import wave
+
+import constants
 
 
 def bytes_to_bits(bytes_value):
@@ -24,3 +28,18 @@ def make_tree(path):
             if item.is_file():
                 tree['children'].append(dict(name=str(item)))
     return tree
+
+
+def save_audio_data(path, audio_data):
+    if not audio_data:
+        return
+
+    with open(path, 'wb') as f:
+        wf = wave.Wave_write(f)
+        max_amp = max(max(audio_data), -min(audio_data))
+        if max_amp > constants.SHORT_MAX_VAL:
+            audio_data = list(map(lambda x: int(x / max_amp * constants.SHORT_MAX_VAL), audio_data))
+        bin_wave = struct.pack(f"{len(audio_data)}h", *audio_data)
+        wf.setparams((1, 2, constants.SAMPLING_RATE, len(bin_wave), 'NONE', 'not compressed'))
+        wf.writeframes(bin_wave)
+        wf.close()

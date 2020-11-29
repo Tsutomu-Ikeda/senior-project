@@ -63,7 +63,7 @@
       };
 
       $("#start-button").on("click", function () {
-        ws = new WebSocket(`ws://${location.host}/pipe`);
+        ws = new WebSocket(`ws://${location.host}/pipe?is_mock=true`);
         let image_src = 'data:image/jpeg;base64,';
         let image_data;
         ws.onopen = function () {
