@@ -24,7 +24,7 @@
         {% set ns = namespace(count = 0) %}
         {%- for item in tree.children recursive %}
           <a href="/{{ item.name }}" target="_blank" rel="noopener">
-            <li>/{{ item.name }}
+            <li>{{ item.short_name }}
             </li>
           </a>
           {%- if 'orig' not in item.name and ns.count % 2 == 0 -%}

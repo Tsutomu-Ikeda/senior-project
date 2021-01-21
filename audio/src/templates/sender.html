@@ -28,150 +28,209 @@
       .blue {
         background-color: #0000ff;
       }
+
+      #error-message {
+        color: #f54242;
+      }
     </style>
   </head>
 
   <body>
     <div id="app-wrapper">
       <header>
-        <a href="/app">< TOP(光ファイバ通信のデモ)</a>
+        <a href="/app">< top(光ファイバ通信のデモ)</a>
       </header>
       <h1>
         送信側アプリケーション
       </h1>
+      <div id="error-message"></div>
       <button id="trans-button">音声へ変換</button>
       <button id="send-button">送信開始</button><br>
-      <audio id="audio-player" src="" controls>
+      <audio id="audio-player" src="" controls="controls">
         Your browser does not support the audio element.
       </audio>
       <br>
-      <canvas id="canvas" width="480" height="320" style="border: solid 1px #000;box-sizing: border-box;"></canvas>
-      <div class="option">
-        <div class="color">
-          色：
-          <a href="" class="black" data-color="0, 0, 0, 1"></a>
-          <a href="" class="red" data-color="255, 0, 0, 1"></a>
-          <a href="" class="blue" data-color="0, 0, 255, 1"></a>
-        </div>
-        <div class="bold">
-          太さ：
-          <a href="" class="small" data-bold="1">小</a>
-          <a href="" class="middle" data-bold="5">中</a>
-          <a href="" class="large" data-bold="10">大</a>
-        </div>
-      </div>
-      <input type="button" value="clear" id="clear">
+      <select id="data-type">
+        <option value="text">テキストデータ</option>
+        <option value="image">画像データ</option>
+      </select>
+      <br>
+      <div id="data-input-area"></div>
     </div>
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script type="text/javascript">
-      var cnvs = document.getElementById('canvas');
-      var ctx = cnvs.getContext('2d');
+      $('#data-type').on('change', (e) => {
+        switch (e.target.value) {
+          case 'text':
+            setTextBox();
+            break;
+          case 'image':
+            setCanvas();
+            break;
+        };
+      });
 
-      // 変数宣言
-      const cnvWidth = 480;
-      const cnvHeight = 320;
-      var cnvColor = "255, 0, 0, 1"; // 線の色
-      var cnvBold = 5; // 線の太さ
-      var clickFlg = 0; // クリック中の判定 1:クリック開始 2:クリック中
-      var bgColor = "rgb(255,255,255)";
-
-      // canvasの背景色を設定(指定がない場合にjpeg保存すると背景が黒になる)
-      setBgColor();
-
-      // canvas上でのイベント
-      $("#canvas")
-        .mousedown(function () {
-          clickFlg = 1; // マウス押下開始
-        })
-        .mouseup(function () {
-          clickFlg = 0; // マウス押下終了
-        })
-        .mousemove(function (e) {
-          // マウス移動処理
-          if (!clickFlg) 
-            return false;
-          draw(e.offsetX, e.offsetY);
-        });
-
-      function draw(x, y) {
-        ctx.lineWidth = cnvBold;
-        ctx.strokeStyle = 'rgba(' + cnvColor + ')';
-        if (clickFlg == "1") {
-          clickFlg = "2";
-          ctx.beginPath();
-          ctx.lineCap = "round";
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-        ctx.stroke();
+      const setTextBox = () => {
+        $('#data-input-area').html(`
+        <textarea id="target-text" style="width: 480px; height: 320px">
+          吾輩は猫である。名前はまだ無い。
+          どこで生れたかとんと見当がつかぬ。何でも薄暗いじめじめした所でニャーニャー泣いていた事だけは記憶している。吾輩はここで始めて人間というものを見た。しかもあとで聞くとそれは書生という人間中で一番獰悪な種族であったそうだ。この書生というのは時々我々を捕えて煮て食うという話である。しかしその当時は何という考もなかったから別段恐しいとも思わなかった。ただ彼の掌に載せられてスーと持ち上げられた時何だかフワフワした感じがあったばかりである。掌の上で少し落ちついて書生の顔を見たのがいわゆる人間というものの見始であろう。
+        </textarea>
+        `.replace(/^\n|\s+$|^ +/gm, ''));
       };
 
-      // 色の変更
-      $(".color a").click(function () {
-        cnvColor = $(this).data("color");
-        return false;
-      });
+      const setCanvas = () => {
+        $('#data-input-area').html(`
+            <canvas id="canvas" width="480" height="320" style="border: solid 1px #000;box-sizing: border-box;"></canvas>
+            <div class="option">
+              <div class="color">
+                色：
+                <a href="" class="black" data-color="0, 0, 0, 1"></a>
+                <a href="" class="red" data-color="255, 0, 0, 1"></a>
+                <a href="" class="blue" data-color="0, 0, 255, 1"></a>
+              </div>
+              <div class="bold">
+                太さ：
+                <a href="" class="small" data-bold="1">小</a>
+                <a href="" class="middle" data-bold="5">中</a>
+                <a href="" class="large" data-bold="10">大</a>
+              </div>
+            </div>
+            <input type="button" value="clear" id="clear">
+            `);
 
-      // 線の太さ変更
-      $(".bold a").click(function () {
-        cnvBold = $(this).data("bold");
-        return false;
-      });
+        var cnvs = $('#canvas').get(0);
+        var ctx = cnvs.getContext('2d');
 
-      // 描画クリア
-      $("#clear").click(function () {
-        ctx.clearRect(0, 0, cnvWidth, cnvHeight);
-        setBgColor();
-      });
+        // 変数宣言
+        const cnvWidth = 480;
+        const cnvHeight = 320;
+        var cnvColor = "0, 0, 0, 1"; // 線の色
+        var cnvBold = 5; // 線の太さ
+        var clickFlg = 0; // クリック中の判定 1:クリック開始 2:クリック中
 
-      function setBgColor() {
         // canvasの背景色を設定(指定がない場合にjpeg保存すると背景が黒になる)
-        ctx.fillStyle = bgColor;
-        ctx.fillRect(0, 0, cnvWidth, cnvHeight);
-      }
-      $('#trans-button').click(function () {
-        var sendImageBinary = function (blob) {
+        setBgColor("rgb(255,255,255)");
+        // canvas上でのイベント
+        $("#canvas")
+          .mousedown(function () {
+            clickFlg = 1; // マウス押下開始
+          })
+          .mouseup(function () {
+            clickFlg = 0; // マウス押下終了
+          })
+          .mousemove(function (e) {
+            // マウス移動処理
+            if (!clickFlg) 
+              return false;
+            draw(e.offsetX, e.offsetY);
+          });
+
+        function draw(x, y) {
+          ctx.lineWidth = cnvBold;
+          ctx.strokeStyle = 'rgba(' + cnvColor + ')';
+          if (clickFlg == "1") {
+            clickFlg = "2";
+            ctx.beginPath();
+            ctx.lineCap = "round";
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        };
+
+        // 色の変更
+        $(".color a").click(function () {
+          cnvColor = $(this).data("color");
+          return false;
+        });
+
+        // 線の太さ変更
+        $(".bold a").click(function () {
+          cnvBold = $(this).data("bold");
+          return false;
+        });
+
+        // 描画クリア
+        $("#clear").click(function () {
+          ctx.clearRect(0, 0, cnvWidth, cnvHeight);
+          setBgColor("rgb(255,255,255)");
+        });
+
+        function setBgColor(bgColor) {
+          // canvasの背景色を設定(指定がない場合にjpeg保存すると背景が黒になる)
+          ctx.fillStyle = bgColor;
+          ctx.fillRect(0, 0, cnvWidth, cnvHeight);
+        }
+      };
+
+      $('#trans-button').on('click', () => {
+        $('#error-message').html("");
+        const convertBytesToWav = (blob) => {
           var formData = new FormData();
           formData.append('file', blob);
           const xhr = new XMLHttpRequest();
-
-          xhr.open('POST', '/gen_audio_signal', true);
           xhr.responseType = 'blob';
 
-          xhr.onload = () => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              const audio_binary = reader
-                .result
-                .replace(/^data:application\/octet-stream;base64,/, 'data:audio/wav;base64,');
-              $('#audio-player').attr('src', audio_binary);
+          xhr.onload = (ev) => {
+            console.log();
+            if (xhr.status == 200) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const audio_binary = reader
+                  .result
+                  .replace(/^data:application\/octet-stream;base64,/, 'data:audio/wav;base64,');
+                $('#audio-player').attr('src', audio_binary);
+              }
+              reader.readAsDataURL(xhr.response);
+            } else {
+              (async () => {
+                $('#error-message').html(`エラーが発生しました。<br>${await xhr.response.text()}`)
+              })();
+
             }
-            reader.readAsDataURL(xhr.response);
           };
+          xhr.onerror = (ev) => {
+            $('#error-message').html("ネットワークアクセスでエラーが発生しました。")
+          };
+
+          xhr.open('POST', '/gen_audio_ook', true);
           xhr.send(formData);
         }
 
-        canvas = $('#canvas')[0].toDataURL("image/jpeg", 0.9);
-        var base64Data = canvas.split(',')[1],
-          data = window.atob(base64Data),
-          buff = new ArrayBuffer(data.length),
-          arr = new Uint8Array(buff),
-          blob,
-          i,
-          dataLen;
+        const getBlob = (fileType) => {
+          if (fileType == "image") {
+            canvas = $('#canvas')[0].toDataURL("image/jpeg", 0.8);
+            const base64Data = canvas.split(',')[1],
+              data = window.atob(base64Data),
+              buff = new ArrayBuffer(data.length),
+              arr = new Uint8Array(buff);
 
-        for (i = 0, dataLen = data.length; i < dataLen; i++) {
-          arr[i] = data.charCodeAt(i);
+            let blob,
+              i,
+              dataLen;
+
+            for (i = 0, dataLen = data.length; i < dataLen; i++) {
+              arr[i] = data.charCodeAt(i);
+            }
+            return new Blob([arr], {type: 'image/jpeg'});
+          }
+
+          if (fileType == "text") {
+            const rawText = $('#target-text').val();
+            return new Blob([(new TextEncoder('utf-8')).encode(rawText)], {type: 'text/plain'});
+          }
         }
-        blob = new Blob([arr], {type: 'image/jpeg'});
-        sendImageBinary(blob);
+        convertBytesToWav(getBlob($('#data-type').val()));
       });
       $('#send-button').on('click', () => {
         const audioPlayer = $('#audio-player')[0];
         audioPlayer.currentTime = 0;
         audioPlayer.play();
       })
+
+      setTextBox();
     </script>
   </body>
 

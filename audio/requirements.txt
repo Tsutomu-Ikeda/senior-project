@@ -2,3 +2,4 @@ flask
 gevent
 gevent-websocket
 pillow
+numpy

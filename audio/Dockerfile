@@ -11,7 +11,7 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
 
 RUN apt update \
-  && apt install -y libxml2 \
+  && apt install -y libxml2 libtiff5-dev libjpeg62-turbo-dev zlib1g-dev libfreetype6-dev liblcms2-dev libwebp-dev libopenjp2-7 libxcb1 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 

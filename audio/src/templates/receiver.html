@@ -20,16 +20,54 @@
         <button id="start-button">受信開始</button>
         <button id="end-button">受信終了</button>
       </div>
-      <img id="image" hidden="hidden"></img>
+      <select id="data-type">
+        <option value="text">テキストデータ</option>
+        <option value="image">画像データ</option>
+      </select>
+      <label>
+        <input type="checkbox" id="is_mock">
+        ダミーデータを使う
+      </label>
+      <br>
+      しきい値:
+      <input id="threshold" type="range" value="40000" min="10000" max="100000" step="10000" oninput="document.getElementById('output1').value=this.value">
+      <output id="output1">40000</output>
+      <br>
+      <div id="progress"></div>
+      <div id="data-output-area"></div>
       <canvas id="canvas" hidden="hidden"></canvas>
     </div>
     <script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
     <script type="text/javascript">
+      const setTextBox = () => {
+        $('#progress').html("");
+        $('#data-output-area').html(`
+        <textarea style="width: 480px; height: 320px" readonly>
+        </textarea>
+        `.replace(/^\n|\s+$|^ +/gm, ''));
+      };
+
+      const setImageTag = () => {
+        $('#progress').html("");
+        $('#data-output-area').html(`
+        <img id="image" hidden="hidden"></img>
+        `.replace(/^\n|\s+$|^ +/gm, ''));
+      };
+
+      $('#data-type').on('change', (e) => {
+        switch (e.target.value) {
+          case 'text':
+            setTextBox();
+            break;
+          case 'image':
+            setImageTag();
+            break;
+        };
+      });
+      setTextBox();
+
       const SAMPLING_RATE = 48000;
       const BUFFER_SIZE = 16384;
-
-      const canvas = document.getElementById("canvas");
-      const ctx = canvas.getContext("2d");
 
       let ws,
         processor;
@@ -63,36 +101,91 @@
       };
 
       $("#start-button").on("click", function () {
-        ws = new WebSocket(`ws://${location.host}/pipe?is_mock=true`);
+        const dataType = $('#data-type').val();
+        switch (dataType) {
+          case 'text':
+            setTextBox();
+            break;
+          case 'image':
+            setImageTag();
+            break;
+        };
+        const isMock = $('#is_mock').prop('checked');
+        const threshold = $('#threshold').val();
+        ws = new WebSocket(`ws://${location.host}/pipe?is_mock=${isMock}&type=${dataType}&threshold=${threshold}`);
         let image_src = 'data:image/jpeg;base64,';
-        let image_data;
+        let text_segments = [];
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
         ws.onopen = function () {
+          let isSizeReceived = false;
+          let bytesReceived = 0;
+          let wholeSize = 0;
+
           ws.onmessage = function (message) {
-            if (message.data) {
-              const reader = new FileReader();
-              reader.onload = () => {
-                const received_data = reader
-                  .result
-                  .replace(/^data:([^,]+,)?/, '');;
+            if (!isSizeReceived) {
+              wholeSize = JSON
+                .parse(message.data)
+                .size;
+              isSizeReceived = true;
+              return
+            }
 
-                image_src += received_data;
+            bytesReceived += message.data.size;
+            eta = Math.round((wholeSize - bytesReceived) / 600 * 10) / 10;
+            $('#progress').html(`受信済みデータ: ${bytesReceived}バイト / 全体データサイズ: ${wholeSize}バイト<br>
+              推定残り時間: ${eta} 秒`);
 
-                var img = new Image();
-                img.onload = function () {
+            if (dataType == "image") {
+              if (message.data) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  const received_data = reader
+                    .result
+                    .replace(/^data:([^,]+,)?/, '');;
+
+                  image_src += received_data;
+
+                  var img = new Image();
+                  img.onload = function () {
+                    $('#image').attr('src', image_src);
+                    if ($('#image').attr('hidden')) {
+                      $('#image').attr('hidden', false);
+                    }
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                  };
+
+                  img.src = image_src;
                   $('#image').attr('src', image_src);
                   if ($('#image').attr('hidden')) {
                     $('#image').attr('hidden', false);
                   }
-                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                 };
-
-                img.src = image_src;
-                $('#image').attr('src', image_src);
-                if ($('#image').attr('hidden')) {
-                  $('#image').attr('hidden', false);
+                reader.readAsDataURL(message.data);
+              }
+            } else {
+              const concat = (segments) => {
+                const sumLength = segments
+                  .map((segment) => segment.byteLength)
+                  .reduce((sum, element) => sum + element, 0);
+                var whole = new Uint8Array(sumLength);
+                var pos = 0;
+                for (var i = 0; i < segments.length; ++i) {
+                  whole.set(new Uint8Array(segments[i]), pos);
+                  pos += segments[i].byteLength;
                 }
+                return whole.buffer;
               };
-              reader.readAsDataURL(message.data);
+              (async () => {
+                const ab = await message
+                  .data
+                  .arrayBuffer();
+                const arr8 = new Uint8Array(ab, 0, ab.byteLength)
+                text_segments.push(arr8)
+                const text = (new TextDecoder("utf-8")).decode(concat(text_segments));
+                $('#data-output-area > textarea').html(text);
+              })();
             }
           }
           navigator
