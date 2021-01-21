@@ -1,0 +1,235 @@
+body {
+  color: #000;
+  font-family: "ヒラギノ明朝 Pro W3","Hiragino Mincho Pro","ＭＳ Ｐ明朝","MS PMincho",serif;
+  -webkit-print-color-adjust: exact;
+  color-adjust: exact;
+  vertical-align: bottom;
+  word-break: break-all;
+  hyphens: auto;
+}
+
+.MJXc-TeX-unknown-R {
+  font-family: "ヒラギノ明朝 Pro W3","Hiragino Mincho Pro","ＭＳ Ｐ明朝","MS PMincho",serif !important;
+  font-weight: 100 !important;
+  font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', 'ＭＳ　Ｐゴシック', 'MS PGothic', sans-serif;
+}
+
+h1 {
+  font-size: 32px;
+}
+
+hr {
+  page-break-after: always;
+  border-style: none;
+}
+
+h1 {
+  border-bottom-style: none;
+}
+
+p {
+  line-height: 1.5em;
+  text-indent: 1em;
+  margin: 0;
+}
+
+a, a:visited {
+  text-decoration: none;
+  color: #008DBD;
+}
+
+ul {
+  margin: 0;
+  padding-inline-start: 3em;
+}
+
+blockquote {
+  background-color: #ddd;
+  padding: 10px;
+  margin: 10px 40px;
+}
+
+code {
+  background-color: #ddd;
+  padding: 4px;
+}
+
+blockquote p {
+  margin: 0;
+  line-height: 1.2em;
+}
+
+img {
+  display: block;
+  margin: auto;
+  max-width: 100%;
+}
+
+figcaption {
+  margin: auto;
+  text-align: center;
+  font-weight: 800;
+}
+
+table{
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+th {
+  color: #fff;
+  padding: 5px;
+  background: #333;
+  font-weight: bold;
+  line-height: 120%;
+  text-align: center;
+}
+
+th:nth-child(n + 2) {
+  border-left: 1px solid #fff;
+}
+
+th:last-child {
+  border-right: 1px solid #333;
+}
+
+table td {
+  padding: 5px;
+  border: 1px solid #333;
+	background: #ddd;
+}
+
+table tr:nth-child(odd) td {
+	background: #fff;
+}
+
+figure {
+  width: 100%;
+  margin: 10px auto;
+}
+
+.fig-two-column {
+  width: 100%;
+  display: flex;
+}
+
+.fig-two-column figure {
+  width: 50%;
+  margin: 0;
+}
+
+.image-with-border img {
+  border: solid 1px #000;
+}
+
+.refs ol {
+  padding:0;
+  margin:0;
+}
+
+.refs ol li {
+  list-style-type:none;
+  list-style-position:inside;
+  counter-increment: cnt;
+}
+
+.refs ol li:before {
+  display: marker;
+  content: "[" counter(cnt) "] ";
+}
+
+@media screen {
+  body {
+    width: 85%;
+    max-width: 640px;
+    margin: auto;
+  }
+
+  hr {
+    margin: 0;
+  }
+
+  .head-title p {
+    text-align: right;
+  }
+
+  @media (min-width: 960px ) {
+    .toc-wrapper {
+      position: fixed;
+      width: calc((100vw - 640px) / 2);
+      top: 50px;
+      left: 0px;
+      font-size: 0.75rem;
+    }
+
+    .toc {
+      margin: auto;
+      width: 60%;
+      height: 80vh;
+      min-width: 140px;
+      overflow: scroll;
+    }
+
+    .toc h2 {
+      font-size: 12px;
+    }
+
+    .toc ul {
+      padding-left: 8px;
+      list-style: none;
+    }
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 30mm 18mm;
+  }
+
+  @page:after {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    counter-increment: page-number;
+    content: “ページ ” counter(page-number);
+  }
+
+  .toc ul a {
+    color: #000;
+  }
+
+  .toc ul {
+    list-style: none;
+    font-size: 18px;
+    font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', 'ＭＳ　Ｐゴシック', 'MS PGothic', sans-serif;
+    padding-inline-start: 1em;
+  }
+
+  .head-title-wrapper {
+    margin: auto;
+    height: calc(297mm - 30mm * 2 - 10mm);
+    display: flex;
+    justify-content: center;
+  }
+
+  .head-title {
+    margin: auto;
+    text-align: center !important;
+    font-size: 24px;
+    font-weight: 700;
+    font-family: "Hiragino Kaku Gothic ProN", "メイリオ", sans-serif;
+    line-height: 2em;
+    position: relative;
+    width: 100%;
+    page-break-after: always;
+  }
+
+  .head-title p {
+    margin: 20px auto;
+  }
+}
