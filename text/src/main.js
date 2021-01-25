@@ -1,5 +1,6 @@
 const fs = require('fs');
 require('log-timestamp');
+const cheerio = require('cheerio');
 const marked = require("marked");
 const puppeteer = require('puppeteer');
 const { PDFDocument } = require('pdf-lib');
@@ -57,7 +58,13 @@ fs.watch(srcFolder, async (event, filename) => {
       });
     });
     </script></body>\n`);
-    fs.writeFileSync("./src/paper.html", html);
+    const $ = cheerio.load(html);
+    $('.toc a').each(
+      (i, elem) => {
+        $(elem).attr('href', `#${$(elem).text().toLowerCase().replace(" ", "-").replace(/\//ig, "")}`);
+      }
+    );
+    fs.writeFileSync("./src/paper.html", $.html());
 
     const browser = await puppeteer.launch(
       {
@@ -71,7 +78,9 @@ fs.watch(srcFolder, async (event, filename) => {
     );
     await page.waitForSelector('span.mjx-mn');
     const title = await page.title();
-    const pdf = await page.pdf();
+    const pdf = await page.pdf({
+      format: 'A4',
+    });
     await browser.close();
 
     const pdfDoc = await PDFDocument.load(pdf);
@@ -82,7 +91,7 @@ fs.watch(srcFolder, async (event, filename) => {
 
     for (let i = 0; i < pages.length; i++) {
       const pageNumber = i - 1;
-      if (pageNumber > 0 && i < pages.length - 1) {
+      if (pageNumber > 0 && i < pages.length - 2) {
         const textWidth = 8.232 * pageNumber.toString().length;
         pages[i].drawText(
           `${pageNumber}`,
