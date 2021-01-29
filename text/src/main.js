@@ -91,7 +91,7 @@ fs.watch(srcFolder, async (event, filename) => {
 
     for (let i = 0; i < pages.length; i++) {
       const pageNumber = i - 1;
-      if (pageNumber > 0 && i < pages.length - 2) {
+      if (pageNumber > 0 && i < pages.length - 1) {
         const textWidth = 8.232 * pageNumber.toString().length;
         pages[i].drawText(
           `${pageNumber}`,
