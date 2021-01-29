@@ -140,6 +140,10 @@ def receive(ws, is_mock, data_type, callback):
 
             if recorded_data[:len(message) // 4]:
                 data = recorded_data[:len(message) // 4]
+                (index, count) = find_continuous_zero(data)
+                while index:
+                    del data[index:index + count]
+                    (index, count) = find_continuous_zero(data)
                 yield from data
 
                 del recorded_data[:len(message) // 4]
@@ -182,9 +186,9 @@ def get_bits(receive: Generator[float, None, None], power_threshold: int) -> Gen
                     return audio_data[j - Lf:j] * win_func
 
             spectrogram = np.fft.rfft(get_target(), n=Lf, axis=0)
-            a = np.abs(spectrogram)
+            power = np.abs(spectrogram[target_band])
 
-            if a[target_band] > power_threshold:
+            if power > power_threshold:
                 phase_diff = np.angle(spectrogram[target_band])
                 center_width = 3.14 / half_sample
                 if is_receiving and phase_diff >= center_width / 2:
