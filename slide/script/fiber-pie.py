@@ -4,12 +4,12 @@ plt.rcParams['font.size'] = 16
 plt.rcParams['font.family'] = 'sans-serif'
 plt.rcParams['font.sans-serif'] = ['Hiragino Maru Gothic Pro', 'Yu Gothic', 'Meirio', 'Takao', 'IPAexGothic', 'IPAPGothic', 'VL PGothic', 'Noto Sans CJK JP']
 
-fig = plt.figure(figsize=(8, 6))
+fig = plt.figure(figsize=(12, 6))
 
 ratios = [8, 21, 5]
 labels = ['知っていて説明できる', '知っているが説明できない', '知らない']
-explode = [0.1, 0, 0]
-colors = ['#cc2b2b', '#777', '#999']
+explode = [0, 0, 0]
+colors = ['#777', '#cc2b2b', '#d16666']
 
 _, _, autotexts = plt.pie(
     ratios,

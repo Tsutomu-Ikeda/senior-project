@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "watch": "marp --html --server ."
+    "watch": "marp --html --allow-local-files --server ."
   },
   "dependencies": {
     "@marp-team/marp-cli": "^0.23.0"
