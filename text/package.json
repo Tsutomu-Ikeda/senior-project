@@ -7,7 +7,7 @@
     "log-timestamp": "^0.3.0",
     "marked": "^1.2.7",
     "pdf-lib": "^1.14.0",
-    "puppeteer": "^5.5.0"
+    "puppeteer-core": "^6.0.0"
   },
   "scripts": {
     "watch": "node src/main.js"

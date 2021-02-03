@@ -2,7 +2,7 @@ const fs = require('fs');
 require('log-timestamp');
 const cheerio = require('cheerio');
 const marked = require("marked");
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const { PDFDocument } = require('pdf-lib');
 const liveServer = require("live-server");
 
@@ -68,6 +68,7 @@ fs.watch(srcFolder, async (event, filename) => {
 
     const browser = await puppeteer.launch(
       {
+        executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         args: ["--no-sandbox", "--disable-setuid-sandbox"]
       }
     );
@@ -91,7 +92,8 @@ fs.watch(srcFolder, async (event, filename) => {
 
     for (let i = 0; i < pages.length; i++) {
       const pageNumber = i - 1;
-      if (pageNumber > 0 && i < pages.length - 1) {
+      const appendixNum = 5;
+      if (pageNumber > 0 && i < pages.length - appendixNum) {
         const textWidth = 8.232 * pageNumber.toString().length;
         pages[i].drawText(
           `${pageNumber}`,
