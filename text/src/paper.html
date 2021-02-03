@@ -507,10 +507,16 @@ def stft(s, Lf=80, overlap=None):
 
 <p>この問題を解決するために短時間フーリエ変換の結果の複素数の偏角、つまり位相の情報を活用することで、常に位相を合わせた状態で復調できるように工夫した。</p><pre><code class="language-python">for (j, data) in enumerate(receive):
     audio_data.append(data)
-    if j - last_j &gt;= overlap and (not phase_adjust or j + phase_adjust &lt;= len(audio_data)):
+    if (
+        j - last_j &gt;= overlap
+    ) and (
+        not phase_adjust or j + phase_adjust &lt;= len(audio_data)
+    ):
         def get_target():
             if phase_adjust:
-                return audio_data[j - Lf + phase_adjust:j + phase_adjust] * win_func
+                return (
+                    audio_data[j - Lf + phase_adjust:j + phase_adjust]
+                ) * win_func
             else:
                 return audio_data[j - Lf:j] * win_func
         spectrogram = np.fft.rfft(get_target(), n=Lf, axis=0)
@@ -525,7 +531,9 @@ def stft(s, Lf=80, overlap=None):
             else:
                 last_j = j
             if not is_receiving:
-                phase_adjust = -int(np.angle(spectrogram[target_band]) * half_sample / 3.14)
+                phase_adjust = -int(
+                    np.angle(spectrogram[target_band]) * half_sample / 3.14
+                )
             is_receiving = True
             yield "1"
         elif is_receiving:
@@ -641,11 +649,100 @@ def stft(s, Lf=80, overlap=None):
 </ol>
 </div>
 
-<!-- ---
+<hr>
+<h2 id="付録">付録</h2>
+<h3 id="デモシステムを自分で動かす場合の手順">デモシステムを自分で動かす場合の手順</h3>
+<p>本節ではデモシステムを動かすために必要な手順について解説する。なお、Windows10 Proの場合についてのみ詳しく説明を行うが、必要なアプリケーションであるブラウザ、Docker、Gitをインストールすれば同じように環境を構築できる。</p><h4 id="1-google-chromeのインストール">1. Google Chromeのインストール</h4>
+<p><a href="https://www.google.com/intl/ja_jp/chrome/">https://www.google.com/intl/ja_jp/chrome/</a></p><p>まず、ブラウザをインストールする。上記のリンクからインストーラをダウンロードし実行すればインストールできる。
+Google Chromeを利用しているのは、ブラウザのシェアで最も大きく、問題が発生したときにインターネット上で情報を得やすいからである。</p><h4 id="2-dockerのインストール">2. Dockerのインストール</h4>
+<p><a href="https://www.docker.com/products/docker-desktop">https://www.docker.com/products/docker-desktop</a></p><p>次にDockerをインストールする。上記のリンクからインストーラをダウンロードし実行する。</p><figure class="image-with-border" style="width: 480px">
 
-## 付録
+<img src="./assets/images/docker1.png" alt=""><figcaption>最初に表示される画面</figcaption>
+</figure>
 
-### デモシステムを自分で動かす場合の手順 -->
+<figure class="image-with-border" style="width: 480px">
+
+<img src="./assets/images/docker2.png" alt=""><figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+<img src="./assets/images/docker3.png" alt=""><figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+<img src="./assets/images/docker4.png" alt=""><figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+<img src="./assets/images/docker5.png" alt=""><figcaption>hogehoge</figcaption>
+</figure>
+
+<hr>
+<h4 id="3-visual-studio-codeのインストール">3. Visual Studio Codeのインストール</h4>
+<p><a href="https://code.visualstudio.com/">https://code.visualstudio.com/</a></p><p>ソースコードのエディタとしてVisual Studio Codeをインストールする。インストーラをダウンロードして実行すると、使用許諾契約の画面、追加タスクの選択画面の順番に表示される。</p><p>追加タスクの選択では、以下の4つにチェックをつけることがおすすめの設定である。</p><ul>
+<li>エクスプローラのファイルコンテキストメニューに[Codeで開く]アクションを追加する</li>
+<li>エクスプローラのディレクトリコンテストメニューに[Codeで開く]アクションを追加する</li>
+<li>サポートされているファイルの種類のエディタとして、Codeを登録する</li>
+<li>PATHへの追加(再起動後に使用可能)</li>
+</ul>
+<p>最終的に以下の画面が表示されたらインストール成功である。「Visual Studio Codeを実行する」のチェックを外し完了を押す。</p><figure class="image-with-border" style="width: 320px">
+
+<img src="./assets/images/vscode3.png" alt=""><figcaption>インストール完了の画面</figcaption>
+</figure>
+
+<h4 id="4-gitのインストール">4. Gitのインストール</h4>
+<p><a href="https://gitforwindows.org">https://gitforwindows.org</a></p><p>Gitとはバージョン管理ツールの1つである。今回、ソースコードがGitHub上にアップロードされているため、それを直接ダウンロードするために用いる。なお、Git for Windowsのインストール中のオプションは多岐に渡るものの、基本的にそのままの設定を用いて問題はない。注意が必要な部分だけ以下で紹介する。</p><p>最初に気をつける点はエディタの選択である。初期値ではVimがデフォルトのエディタとなっているが、Visual Studio Codeがインストールされているため、Visual Studio Codeを使うように設定を変更する。</p><figure class="image-with-border" style="width: 350px">
+
+<img src="./assets/images/git4.png" alt=""><figcaption>デフォルトのエディタを選択する画面</figcaption>
+</figure>
+
+<p>次に変更するのはデフォルトのブランチ名の設定である。初期値では「master」をデフォルトのブランチ名としているが、GitHubのものと異なっている。異なっていてもただちに問題が発生するわけではないが、GitHubに合わせて「main」に変更したほうが無難である。</p><figure class="image-with-border" style="width: 350px">
+
+<img src="./assets/images/git5.png" alt=""><figcaption>デフォルトのブランチ名を設定する画面</figcaption>
+</figure>
+
+<p>改行コードについても変更を行う。<strong>この設定は非常に重要であるため欠かしてはならない。</strong>改行コードはプラットフォームによって異なっており、LinuxやmacOSといったUnix系のシステムでは <code>LF</code> であり、Windows系のシステムでは <code>CR + LF</code> となっている。Gitの初期設定ではプラットフォームの差異を補正するためにWindows上でファイルの改行コードを書き換えるような処理を行っている。この処理が原因でプログラムが期待通りに動かなくなってしまうことが起こり得る。<br>
+そこで、「Checkout as is, commit as is」を選ぶことで、勝手に書き換えるということがないように設定する必要がある。</p><figure class="image-with-border" style="width: 400px">
+
+<img src="./assets/images/git8.png" alt=""><figcaption>改行コードについての設定</figcaption>
+</figure>
+
+<p>後はそのままの設定で進むだけである。完了すると以下のような画面になるので、「Launch Git Bash」にチェックを入れ、「View Release Notes」はチェックを外し、「Finish」ボタンを押す。</p><figure class="image-with-border" style="width: 400px">
+
+<img src="./assets/images/git14.png" alt=""><figcaption>インストール完了の画面</figcaption>
+</figure>
+
+<hr>
+<h4 id="5-デモシステムのダウンロード及び起動">5. デモシステムのダウンロード及び起動</h4>
+<p>Git Bashを起動する。Gitのインストール終了時にGit Bashを起動していれば新しく起動する必要はない。
+Git Bash上で以下のコマンドを実行する。</p><pre><code class="language-bash">cd ~/Documents
+git clone https://github.com/Tsutomu-Ikeda/senior-project
+cd senior-project
+docker-compose up -d --build</code></pre>
+<p><code>git clone</code> はたくさんのデータをダウンロードするため、ネットワーク環境によっては多くの時間がかかる可能性がある。</p><figure class="image-with-border" style="width: 400px">
+
+<img src="./assets/images/bash1.png" alt=""><figcaption>git cloneまで行った画面</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 400px">
+
+<img src="./assets/images/bash2.png" alt=""><figcaption>docker-composeコマンドを打ち込んだ画面</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 400px">
+
+<img src="./assets/images/bash3.png" alt=""><figcaption>docker-composeコマンドが完了した画面</figcaption>
+</figure>
+
+
+
+<ul>
+<li>localhostへのアクセスと録音</li>
+</ul>
+<div style="height: 80px"></div>
 
 <script>
     document.addEventListener('DOMContentLoaded', (event) => {

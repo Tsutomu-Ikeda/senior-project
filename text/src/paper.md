@@ -664,10 +664,16 @@ def stft(s, Lf=80, overlap=None):
 ```python
 for (j, data) in enumerate(receive):
     audio_data.append(data)
-    if j - last_j >= overlap and (not phase_adjust or j + phase_adjust <= len(audio_data)):
+    if (
+        j - last_j >= overlap
+    ) and (
+        not phase_adjust or j + phase_adjust <= len(audio_data)
+    ):
         def get_target():
             if phase_adjust:
-                return audio_data[j - Lf + phase_adjust:j + phase_adjust] * win_func
+                return (
+                    audio_data[j - Lf + phase_adjust:j + phase_adjust]
+                ) * win_func
             else:
                 return audio_data[j - Lf:j] * win_func
         spectrogram = np.fft.rfft(get_target(), n=Lf, axis=0)
@@ -682,7 +688,9 @@ for (j, data) in enumerate(receive):
             else:
                 last_j = j
             if not is_receiving:
-                phase_adjust = -int(np.angle(spectrogram[target_band]) * half_sample / 3.14)
+                phase_adjust = -int(
+                    np.angle(spectrogram[target_band]) * half_sample / 3.14
+                )
             is_receiving = True
             yield "1"
         elif is_receiving:
@@ -829,8 +837,168 @@ for (j, data) in enumerate(receive):
 
 </div>
 
-<!-- ---
+---
 
 ## 付録
 
-### デモシステムを自分で動かす場合の手順 -->
+### デモシステムを自分で動かす場合の手順
+
+本節ではデモシステムを動かすために必要な手順について解説する。なお、Windows10 Proの場合についてのみ詳しく説明を行うが、必要なアプリケーションであるブラウザ、Docker、Gitをインストールすれば同じように環境を構築できる。
+
+#### 1. Google Chromeのインストール
+
+https://www.google.com/intl/ja_jp/chrome/
+
+まず、ブラウザをインストールする。上記のリンクからインストーラをダウンロードし実行すればインストールできる。
+Google Chromeを利用しているのは、ブラウザのシェアで最も大きく、問題が発生したときにインターネット上で情報を得やすいからである。
+
+#### 2. Dockerのインストール
+
+https://www.docker.com/products/docker-desktop
+
+次にDockerをインストールする。上記のリンクからインストーラをダウンロードし実行する。
+
+<figure class="image-with-border" style="width: 480px">
+
+![](./assets/images/docker1.png)
+
+<figcaption>最初に表示される画面</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+![](./assets/images/docker2.png)
+
+<figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+![](./assets/images/docker3.png)
+
+<figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+![](./assets/images/docker4.png)
+
+<figcaption>hogehoge</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 480px">
+
+![](./assets/images/docker5.png)
+
+<figcaption>hogehoge</figcaption>
+</figure>
+
+---
+
+#### 3. Visual Studio Codeのインストール
+
+https://code.visualstudio.com/
+
+ソースコードのエディタとしてVisual Studio Codeをインストールする。インストーラをダウンロードして実行すると、使用許諾契約の画面、追加タスクの選択画面の順番に表示される。
+
+追加タスクの選択では、以下の4つにチェックをつけることがおすすめの設定である。
+
+- エクスプローラのファイルコンテキストメニューに[Codeで開く]アクションを追加する
+- エクスプローラのディレクトリコンテストメニューに[Codeで開く]アクションを追加する
+- サポートされているファイルの種類のエディタとして、Codeを登録する
+- PATHへの追加(再起動後に使用可能)
+
+最終的に以下の画面が表示されたらインストール成功である。「Visual Studio Codeを実行する」のチェックを外し完了を押す。
+
+<figure class="image-with-border" style="width: 320px">
+
+![](./assets/images/vscode3.png)
+
+<figcaption>インストール完了の画面</figcaption>
+</figure>
+
+#### 4. Gitのインストール
+
+https://gitforwindows.org
+
+Gitとはバージョン管理ツールの1つである。今回、ソースコードがGitHub上にアップロードされているため、それを直接ダウンロードするために用いる。なお、Git for Windowsのインストール中のオプションは多岐に渡るものの、基本的にそのままの設定を用いて問題はない。注意が必要な部分だけ以下で紹介する。
+
+最初に気をつける点はエディタの選択である。初期値ではVimがデフォルトのエディタとなっているが、Visual Studio Codeがインストールされているため、Visual Studio Codeを使うように設定を変更する。
+
+<figure class="image-with-border" style="width: 350px">
+
+![](./assets/images/git4.png)
+
+<figcaption>デフォルトのエディタを選択する画面</figcaption>
+</figure>
+
+次に変更するのはデフォルトのブランチ名の設定である。初期値では「master」をデフォルトのブランチ名としているが、GitHubのものと異なっている。異なっていてもただちに問題が発生するわけではないが、GitHubに合わせて「main」に変更したほうが無難である。
+
+<figure class="image-with-border" style="width: 350px">
+
+![](./assets/images/git5.png)
+
+<figcaption>デフォルトのブランチ名を設定する画面</figcaption>
+</figure>
+
+改行コードについても変更を行う。**この設定は非常に重要であるため欠かしてはならない。**改行コードはプラットフォームによって異なっており、LinuxやmacOSといったUnix系のシステムでは `LF` であり、Windows系のシステムでは `CR + LF` となっている。Gitの初期設定ではプラットフォームの差異を補正するためにWindows上でファイルの改行コードを書き換えるような処理を行っている。この処理が原因でプログラムが期待通りに動かなくなってしまうことが起こり得る。<br>
+そこで、「Checkout as is, commit as is」を選ぶことで、勝手に書き換えるということがないように設定する必要がある。
+
+<figure class="image-with-border" style="width: 400px">
+
+![](./assets/images/git8.png)
+
+<figcaption>改行コードについての設定</figcaption>
+</figure>
+
+後はそのままの設定で進むだけである。完了すると以下のような画面になるので、「Launch Git Bash」にチェックを入れ、「View Release Notes」はチェックを外し、「Finish」ボタンを押す。
+
+<figure class="image-with-border" style="width: 400px">
+
+![](./assets/images/git14.png)
+
+<figcaption>インストール完了の画面</figcaption>
+</figure>
+
+---
+
+#### 5. デモシステムのダウンロード及び起動
+
+Git Bashを起動する。Gitのインストール終了時にGit Bashを起動していれば新しく起動する必要はない。
+Git Bash上で以下のコマンドを実行する。
+
+```bash
+cd ~/Documents
+git clone https://github.com/Tsutomu-Ikeda/senior-project
+cd senior-project
+docker-compose up -d --build
+```
+
+`git clone` はたくさんのデータをダウンロードするため、ネットワーク環境によっては多くの時間がかかる可能性がある。
+
+<figure class="image-with-border" style="width: 400px">
+
+![](./assets/images/bash1.png)
+
+<figcaption>git cloneまで行った画面</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 400px">
+
+![](./assets/images/bash2.png)
+
+<figcaption>docker-composeコマンドを打ち込んだ画面</figcaption>
+</figure>
+
+<figure class="image-with-border" style="width: 400px">
+
+![](./assets/images/bash3.png)
+
+<figcaption>docker-composeコマンドが完了した画面</figcaption>
+</figure>
+
+
+
+- localhostへのアクセスと録音
+
+<div style="height: 80px"></div>
