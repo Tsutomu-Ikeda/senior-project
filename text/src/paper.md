@@ -769,6 +769,17 @@ for (j, data) in enumerate(receive):
 
 </figure>
 
+プリアンブルの検知に失敗したのは、信号電圧の変動によりA/Dコンバータの許容電圧を超えてしまったためである。許容電圧を超えることで、正弦波の頭の部分が欠けフーリエ変換の計算結果が変わってしまうのである。アクリル棒の密着具合やLEDの向きが変わることで受信側時の利得が変動することによって許容電圧を超えてしまったと考えられる。
+
+<figure>
+
+![](assets/images/2021-02-04-01-39-33.png)
+
+<figcaption>
+図4.3 上: 許容電圧を超えている受信電圧波形<br> 下: 許容電圧を超えていない受信電圧波形
+</figcaption>
+</figure>
+
 ### 第2節 通信速度の検証
 
 通信速度はほぼ理論値通りとなった。送信側PCの変調信号音声の再生が完了するとともに1秒以内に受信側PCでもデータ復元されることは実験で確認した。
@@ -783,7 +794,7 @@ for (j, data) in enumerate(receive):
 <img src="assets/images/2021-01-19-04-32-38.jpeg" width="336px" height="224px">
 
 <figcaption>
-図4.3 43KBのJPEG画像を伝送した際にわざとアクリル棒を揺らした場合の受信画像
+図4.4 43KBのJPEG画像を伝送した際にわざとアクリル棒を揺らした場合の受信画像
 </figcaption>
 </figure>
 
@@ -857,6 +868,7 @@ Google Chromeを利用しているのは、ブラウザのシェアで最も大�
 https://www.docker.com/products/docker-desktop
 
 次にDockerをインストールする。上記のリンクからインストーラをダウンロードし実行する。
+上の「Install required Windows components for WSL 2」をチェックを入れたまま、「OK」を押す。
 
 <figure class="image-with-border" style="width: 480px">
 
@@ -865,33 +877,43 @@ https://www.docker.com/products/docker-desktop
 <figcaption>最初に表示される画面</figcaption>
 </figure>
 
+インストールが完了するとWindowsを再起動するように促す表示が出るため、「Close and restart」を押して再起動を行う。
+
 <figure class="image-with-border" style="width: 480px">
 
 ![](./assets/images/docker2.png)
 
-<figcaption>hogehoge</figcaption>
+<figcaption>Windowsの再起動を促す画面</figcaption>
 </figure>
+
+Windowsの再起動後しばらくすると警告画面が出る。これはDockerが依存しているWSL 2のインストールがまだ完了していないことを知らせる画面である。この画面に載っている https://aka.ms/wsl2kernel を開くと、「x64マシン用WSL2 Linuxカーネル更新プログラムパッケージ」というリンクが出るので、そちらをクリックして、更新プログラムをインストールする。
 
 <figure class="image-with-border" style="width: 480px">
 
 ![](./assets/images/docker3.png)
 
-<figcaption>hogehoge</figcaption>
+<figcaption>再起動後に表示される警告画面</figcaption>
 </figure>
 
 <figure class="image-with-border" style="width: 480px">
 
 ![](./assets/images/docker4.png)
 
-<figcaption>hogehoge</figcaption>
+<figcaption>マシン用WSL2 Linuxカーネル更新プログラムパッケージをダウンロードできるページ</figcaption>
 </figure>
+
+更新プログラムのインストールが完了した後、警告画面の「Restart」を押すと、Dockerアプリケーションが再起動する。更新プログラムのインストールが完了していれば警告が出ないようになる。<br>
+その後、5分ほど待つとDockerの画面が表示される。今回はチュートリアルの必要はないので、「Skip tutorial」を押せば、Dockerのインストール及び起動確認は完了である。
+
 
 <figure class="image-with-border" style="width: 480px">
 
 ![](./assets/images/docker5.png)
 
-<figcaption>hogehoge</figcaption>
+<figcaption>Docker初回起動時に表示される画面</figcaption>
 </figure>
+
+Dockerは常駐アプリケーションなので、上記のウィンドウを閉じてもDockerは終了しない。もう一度ウィンドウを表示したい場合はタスクトレイからDockerのアイコンであるくじらをクリックすれば良い。
 
 ---
 
@@ -983,6 +1005,8 @@ docker-compose up -d --build
 <figcaption>git cloneまで行った画面</figcaption>
 </figure>
 
+`docker-compose` コマンドを実行すると、Pythonの実行環境などは自動的に構築される。ただし、必要な実行バイナリなどはダウンロードする必要があるため、初回実行時には数分の時間がかかることがある。
+
 <figure class="image-with-border" style="width: 400px">
 
 ![](./assets/images/bash2.png)
@@ -990,15 +1014,32 @@ docker-compose up -d --build
 <figcaption>docker-composeコマンドを打ち込んだ画面</figcaption>
 </figure>
 
-<figure class="image-with-border" style="width: 400px">
+`docker-compose` コマンド実行中にファイヤーウォールを許可するかどうか尋ねる画面が表示される。「プライベートネットワーク」、「パブリックネットワーク」の両方の項目にチェックを入れ、「アクセスを許可する」を押す。
+
+<div class="fig-two-column">
+<figure class="image-with-border">
+
+![](./assets/images/bash5.png)
+
+<figcaption>ファイヤーウォールの設定画面</figcaption>
+</figure>
+
+<figure class="image-with-border">
 
 ![](./assets/images/bash3.png)
 
 <figcaption>docker-composeコマンドが完了した画面</figcaption>
 </figure>
+</div>
 
+上の右図のように緑色の太文字で「done」と表示されれば成功である。
+Google Chromeを開き、アドレスバーへ「localhost:3080」と入力しアクセスし、以下のような画面が表示されたらデモシステムが正常に動いていることが確認できる。
 
+<figure class="image-with-border" style="width: 400px">
 
-- localhostへのアクセスと録音
+![](./assets/images/localhost.png)
 
-<div style="height: 80px"></div>
+<figcaption>デモシステムのトップ画面</figcaption>
+</figure>
+
+<div class="bottom-spacing"></div>

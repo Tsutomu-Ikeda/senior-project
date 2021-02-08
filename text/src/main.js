@@ -92,7 +92,7 @@ fs.watch(srcFolder, async (event, filename) => {
 
     for (let i = 0; i < pages.length; i++) {
       const pageNumber = i - 1;
-      const appendixNum = 5;
+      const appendixNum = 9;
       if (pageNumber > 0 && i < pages.length - appendixNum) {
         const textWidth = 8.232 * pageNumber.toString().length;
         pages[i].drawText(

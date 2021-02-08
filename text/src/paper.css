@@ -191,6 +191,10 @@ figure {
       list-style: none;
     }
   }
+
+  .bottom-spacing {
+    height: 120px;
+  }
 }
 
 @media print {
@@ -247,5 +251,9 @@ figure {
 
   .head-title p:nth-child(3) {
     margin-top: 200px;
+  }
+
+  .bottom-spacing {
+    height: 0;
   }
 }
