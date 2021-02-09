@@ -6,6 +6,21 @@ const puppeteer = require('puppeteer-core');
 const { PDFDocument } = require('pdf-lib');
 const liveServer = require("live-server");
 
+function convertToLowerRoman(num) {
+  var decimal = [ 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 ];
+  var romanNumeral = [ 'm', 'cm', 'd', 'cd', 'c', 'xc', 'l', 'xl', 'x', 'ix', 'v', 'iv', 'i' ];
+
+  var romanized = '';
+
+  for (var i = 0; i < decimal.length; i++) {
+    while (decimal[i] <= num) {
+      romanized += romanNumeral[i];
+      num -= decimal[i];
+    }
+  }
+  return romanized;
+}
+
 const config = {
   liveServerPort: 5555,
 };
@@ -91,12 +106,24 @@ fs.watch(srcFolder, async (event, filename) => {
     const characterSize = 14;
 
     for (let i = 0; i < pages.length; i++) {
-      const pageNumber = i - 1;
       const appendixNum = 9;
-      if (pageNumber > 0 && i < pages.length - appendixNum) {
-        const textWidth = 8.232 * pageNumber.toString().length;
+      const getPageNumberText = (pageNumber) => {
+        if (1 < i && i < pages.length - appendixNum) {
+          return `${i - 1}`;
+        }
+
+        if (i > 32) {
+          return convertToLowerRoman(i - 32);
+        }
+
+        return undefined;
+      }
+      const pageNumberText = getPageNumberText();
+
+      if (pageNumberText) {
+        const textWidth = 8.232 * pageNumberText.length;
         pages[i].drawText(
-          `${pageNumber}`,
+          pageNumberText,
           {
             x: (width - textWidth) / 2,
             y: 40,
