@@ -5,7 +5,7 @@
     "html-minifier": "^4.0.0",
     "live-server": "^1.2.1",
     "log-timestamp": "^0.3.0",
-    "marked": "^1.2.7",
+    "marked": "^2.0.0",
     "pdf-lib": "^1.14.0",
     "puppeteer-core": "^6.0.0"
   },
